@@ -132,7 +132,7 @@ def time_distribution(otp_dataset, stops_dataset):
     otp_dataset_filtered['month_start'] = pd.to_datetime(otp_dataset_filtered['month_start'], infer_datetime_format=True)
 
     # Filter the data and sort based on perspectives
-    perspectives = ['Weekday/Weekends', 'Garages', 'Routes']
+    perspectives = ['Routes', 'Weekday/Weekends', 'Garages']
     perspective = st.selectbox("Pick your perspective", perspectives)
 
     # create pandas dataframe with week data as columns
@@ -142,8 +142,6 @@ def time_distribution(otp_dataset, stops_dataset):
         if values.count(np.nan):
             values.remove(np.nan)
         for value in values:
-            if value is None or value == '' or value is np.nan:
-                continue
             a = otp_dataset_filtered[otp_dataset_filtered[column] == value][['on_time_percent', 'month_start']].groupby(by = 'month_start').aggregate(np.mean).rename(columns = {'on_time_percent':value})
             list_of_series.append(a)
         day_wise_data = pd.concat(list_of_series, axis = 1)
@@ -156,13 +154,9 @@ def time_distribution(otp_dataset, stops_dataset):
     
     # act based on the choice made
     if perspective == perspectives[0]:
-        column_values = otp_dataset_filtered['day_type'].unique()
-        create_and_render_chart(otp_dataset_filtered, 'day_type', column_values)
-    elif perspective == perspectives[1]:
-        column_values = otp_dataset_filtered['current_garage'].unique()
-        create_and_render_chart(otp_dataset_filtered, 'current_garage', column_values)
-    elif perspective == perspectives[2]:
-        column_values = otp_dataset_filtered['route'].unique()
+        column_values = list(otp_dataset_filtered['route'].unique())
+        if column_values.count(np.nan):
+            column_values.remove(np.nan)
         routes = st.multiselect('Select 1-5 routes', column_values)
         route_len = len(routes)
         if route_len<1 or route_len>5:
@@ -170,6 +164,12 @@ def time_distribution(otp_dataset, stops_dataset):
             st.warning(f"Select any number of routes between 1 and 5. There are {int(route_len)} routes are currently selected.")
         else:
             create_and_render_chart(otp_dataset_filtered, 'route', routes)
+    elif perspective == perspectives[1]:
+        column_values = otp_dataset_filtered['day_type'].unique()
+        create_and_render_chart(otp_dataset_filtered, 'day_type', column_values)
+    elif perspective == perspectives[2]:
+        column_values = otp_dataset_filtered['current_garage'].unique()
+        create_and_render_chart(otp_dataset_filtered, 'current_garage', column_values)
 
 # Sidebar and navigation
 st.sidebar.title('Navigation')
