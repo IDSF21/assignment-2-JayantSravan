@@ -1,7 +1,6 @@
 import numpy as np
 import streamlit as st
 from matplotlib import pyplot as plt
-import seaborn as sns
 import pandas as pd
 import pydeck as pdk
 from datetime import datetime
